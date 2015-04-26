@@ -1,0 +1,68 @@
+<!doctype html>
+<html class="no-js" lang="">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <title></title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link rel="apple-touch-icon" href="apple-touch-icon.png">
+        <!-- Place favicon.ico in the root directory -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+
+    </head>
+    <body>
+        <button type="button" class="btn btn-lg btn-primary" onclick="turnon()">ON</button>
+        <button type="button" class="btn btn-lg btn-danger" onclick="turnoff()">OFF</button>
+
+        <script src="js/mqttws31.js"></script>
+        <script>
+          // Create a client instance
+          client = new Paho.MQTT.Client('test.mosquitto.org', 8080, "clientId");
+
+          // set callback handlers
+          client.onConnectionLost = onConnectionLost;
+          client.onMessageArrived = onMessageArrived;
+
+          // connect the client
+          client.connect({onSuccess:onConnect});
+
+
+          // called when the client connects
+          function onConnect() {
+            // Once a connection has been made, make a subscription and send a message.
+            console.log("onConnect");
+            client.subscribe("test");
+            message = new Paho.MQTT.Message("off");
+            message.destinationName = "test";
+            client.send(message);
+          }
+
+          // called when the client loses its connection
+          function onConnectionLost(responseObject) {
+            if (responseObject.errorCode !== 0) {
+              console.log("onConnectionLost:"+responseObject.errorMessage);
+            }
+          }
+
+          // called when a message arrives
+          function onMessageArrived(message) {
+            console.log("onMessageArrived:"+message.payloadString);
+          }
+
+          function message(text){
+            new Paho.MQTT.Message(text).destinationName = 'test'
+          }
+
+          function turnon(){
+            message('on');
+          }
+
+          function turnoff(){
+            message('off');
+          }
+        </script>
+
+    </body>
+</html>
