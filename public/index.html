@@ -13,8 +13,8 @@
 
     </head>
     <body>
-        <button type="button" class="btn btn-lg btn-primary" onclick="turnon()">ON</button>
-        <button type="button" class="btn btn-lg btn-danger" onclick="turnoff()">OFF</button>
+        <button type="button" class="btn btn-lg btn-primary" onclick="message('on')">ON</button>
+        <button type="button" class="btn btn-lg btn-danger" onclick="message('off')">OFF</button>
 
         <script src="js/mqttws31.js"></script>
         <script>
@@ -53,14 +53,6 @@
 
           function message(text){
             new Paho.MQTT.Message(text).destinationName = 'test'
-          }
-
-          function turnon(){
-            message('on');
-          }
-
-          function turnoff(){
-            message('off');
           }
         </script>
 
