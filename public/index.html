@@ -19,7 +19,7 @@
         <script src="js/mqttws31.js"></script>
         <script>
           // Create a client instance
-          client = new Paho.MQTT.Client('test.mosquitto.org', 8080, "clientId");
+          client = new Paho.MQTT.Client('test.mosquitto.org', 8080, random_client_id());
 
           // set callback handlers
           client.onConnectionLost = onConnectionLost;
@@ -28,15 +28,15 @@
           // connect the client
           client.connect({onSuccess:onConnect});
 
+          function random_client_id(){
+            Math.random().toString(36).substring(7);
+          }
 
           // called when the client connects
           function onConnect() {
             // Once a connection has been made, make a subscription and send a message.
             console.log("onConnect");
             client.subscribe("test");
-            message = new Paho.MQTT.Message("off");
-            message.destinationName = "test";
-            client.send(message);
           }
 
           // called when the client loses its connection
