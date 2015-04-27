@@ -52,7 +52,9 @@
           }
 
           function message(text){
-            new Paho.MQTT.Message(text).destinationName = 'test'
+            message = new Paho.MQTT.Message(text)
+            message.destinationName = 'test'
+            client.send(message)
           }
         </script>
 
