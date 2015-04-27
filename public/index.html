@@ -10,16 +10,86 @@
         <link rel="apple-touch-icon" href="apple-touch-icon.png">
         <!-- Place favicon.ico in the root directory -->
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+        <style type="text/css">
+          .red-bg {
+            background-color: #ed5565;
+            color: #ffffff;
+          }
+          .blue-bg {
+            background-color: #204D74;
+            color: #ffffff;
+          }
+          .widget {
+            border-radius: 5px;
+            margin-bottom: 10px;
+            margin-top: 10px;
+            padding: 15px 20px;
+            width: 400px;
+            float: left;
+          }
+          .navy-bg {
+            background-color: #1ab394;
+            color: #ffffff;
+          }
+        </style>
 
     </head>
     <body>
-        <button type="button" class="btn btn-lg btn-primary" onclick="message('on')">ON</button>
-        <button type="button" class="btn btn-lg btn-danger" onclick="message('off')">OFF</button>
+        <h1>Console</h2>
+        <button type="button" class="btn btn-lg btn-primary" onclick="message('vibration', '0')">Vibration 0</button>
+        <button type="button" class="btn btn-lg btn-primary" onclick="message('vibration', '1')">Vibration 1</button>
+        <button type="button" class="btn btn-lg btn-primary" onclick="message('vibration', '2')">Vibration 2</button>
+        <button type="button" class="btn btn-lg btn-primary" onclick="message('vibration', '3')">Vibration 3</button>
+        <button type="button" class="btn btn-lg btn-primary" onclick="message('wet', 'on')">Wet On</button>
+        <button type="button" class="btn btn-lg btn-danger" onclick="message('wet', 'off')">Wet Off</button>
+        <button type="button" class="btn btn-lg btn-primary" onclick="message('fan', 'on')">Fan On</button>
+        <button type="button" class="btn btn-lg btn-danger" onclick="message('fan', 'off')">Fan Off</button>
+
+        <h2>Admin</h2>
+        <h3>Vibration Level</h3>
+        <div class="progress">
+          <div id="vibration_level" class="progress-bar progress-bar-success progress-bar-striped" role="progressbar" aria-valuemin="0" aria-valuemax="100" style="width: 40%">
+            <span class="sr-only"></span>
+          </div>
+        </div>
+        <div class="widget navy-bg text-center">
+          <h3>Fan</h3>
+          <i id="fan" class="fa fa-gear fa-4x fa-spin"></i>
+        </div>
+        <div id="wet" class="widget red-bg p-lg text-center">
+          <i class="fa fa-bell fa-4x"></i>
+          <h3>Water detected</h3>
+        </div>
 
         <script src="js/mqttws31.js"></script>
         <script>
+          var command = {
+            vibration: function(value) {
+              document.getElementById('vibration_level').style.width = value /3 *100 + "%";
+            },
+            wet: function(value){
+              if(value=='off'){
+                document.getElementById('wet').classList.remove("red-bg");
+                document.getElementById('wet').classList.add("blue-bg");
+                document.getElementById('wet').children[1].innerHTML = 'All Dry';
+              } else {
+                document.getElementById('wet').classList.add("red-bg");
+                document.getElementById('wet').classList.remove("blue-bg");
+                document.getElementById('wet').children[1].innerHTML = 'Water detected';
+              }
+            },
+            fan: function(value){
+              if(value == 'off'){
+                document.getElementById('fan').classList.remove("fa-spin")
+              } else{
+                document.getElementById('fan').classList.add("fa-spin")
+              }
+            }
+          };
+
           // Create a client instance
-          client = new Paho.MQTT.Client('test.mosquitto.org', 8080, random_client_id());
+          var client = new Paho.MQTT.Client('test.mosquitto.org', 8080, random_client_id());
 
           // set callback handlers
           client.onConnectionLost = onConnectionLost;
@@ -36,7 +106,7 @@
           function onConnect() {
             // Once a connection has been made, make a subscription and send a message.
             console.log("onConnect");
-            client.subscribe("test");
+            client.subscribe("xively_demo");
           }
 
           // called when the client loses its connection
@@ -48,13 +118,15 @@
 
           // called when a message arrives
           function onMessageArrived(message) {
-            console.log("onMessageArrived:"+message.payloadString);
+            msg = JSON.parse(message.payloadString);
+            console.log(msg);
+            command[msg["command"]](msg["value"]);
           }
 
-          function message(text){
-            message = new Paho.MQTT.Message(text)
-            message.destinationName = 'test'
-            client.send(message)
+          function message(command, value){
+            msg = new Paho.MQTT.Message('{ "command":"' + command + '", "value":"' + value + '"}');
+            msg.destinationName = 'xively_demo';
+            client.send(msg);
           }
         </script>
 
