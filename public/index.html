@@ -29,7 +29,7 @@
           client.connect({onSuccess:onConnect});
 
           function random_client_id(){
-            Math.random().toString(36).substring(7);
+            return Math.random().toString(36).substring(7);
           }
 
           // called when the client connects
