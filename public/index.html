@@ -65,25 +65,30 @@
         <script src="js/mqttws31.js"></script>
         <script>
           var command = {
+
             vibration: function(value) {
               document.getElementById('vibration_level').style.width = value /3 *100 + "%";
             },
+
             wet: function(value){
+              var wet = document.getElementById('wet');
               if(value=='off'){
-                document.getElementById('wet').classList.remove("red-bg");
-                document.getElementById('wet').classList.add("blue-bg");
-                document.getElementById('wet').children[1].innerHTML = 'All Dry';
+                wet.classList.remove("red-bg");
+                wet.classList.add("blue-bg");
+                wet.children[1].innerHTML = 'All Dry';
               } else {
-                document.getElementById('wet').classList.add("red-bg");
-                document.getElementById('wet').classList.remove("blue-bg");
-                document.getElementById('wet').children[1].innerHTML = 'Water detected';
+                wet.classList.add("red-bg");
+                wet.classList.remove("blue-bg");
+                wet.children[1].innerHTML = 'Water detected';
               }
             },
+
             fan: function(value){
+              var fan = document.getElementById('fan')
               if(value == 'off'){
-                document.getElementById('fan').classList.remove("fa-spin")
+                fan.classList.remove("fa-spin")
               } else{
-                document.getElementById('fan').classList.add("fa-spin")
+                fan.classList.add("fa-spin")
               }
             }
           };
