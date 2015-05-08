@@ -37,14 +37,14 @@
     </head>
     <body>
         <h1>Console</h2>
-        <button type="button" class="btn btn-lg btn-primary" onclick="message('vibration', '0')">Vibration 0</button>
-        <button type="button" class="btn btn-lg btn-primary" onclick="message('vibration', '1')">Vibration 1</button>
-        <button type="button" class="btn btn-lg btn-primary" onclick="message('vibration', '2')">Vibration 2</button>
-        <button type="button" class="btn btn-lg btn-primary" onclick="message('vibration', '3')">Vibration 3</button>
-        <button type="button" class="btn btn-lg btn-primary" onclick="message('wet', 'on')">Wet On</button>
-        <button type="button" class="btn btn-lg btn-danger" onclick="message('wet', 'off')">Wet Off</button>
-        <button type="button" class="btn btn-lg btn-primary" onclick="message('fan', 'on')">Fan On</button>
-        <button type="button" class="btn btn-lg btn-danger" onclick="message('fan', 'off')">Fan Off</button>
+        <button type="button" class="btn btn-lg btn-primary" onclick="message('vibration', 0)">Vibration 0</button>
+        <button type="button" class="btn btn-lg btn-primary" onclick="message('vibration', 1)">Vibration 1</button>
+        <button type="button" class="btn btn-lg btn-primary" onclick="message('vibration', 2)">Vibration 2</button>
+        <button type="button" class="btn btn-lg btn-primary" onclick="message('vibration', 3)">Vibration 3</button>
+        <button type="button" class="btn btn-lg btn-primary" onclick="message('wet', 1)">Wet On</button>
+        <button type="button" class="btn btn-lg btn-danger" onclick="message('wet', 0)">Wet Off</button>
+        <button type="button" class="btn btn-lg btn-primary" onclick="message('fan', 1)">Fan On</button>
+        <button type="button" class="btn btn-lg btn-danger" onclick="message('fan', 0)">Fan Off</button>
 
         <h2>Admin</h2>
         <h3>Vibration Level</h3>
@@ -64,6 +64,15 @@
 
         <script src="js/mqttws31.js"></script>
         <script>
+          var credentials = {
+            user_name: '17b9217e-432a-4bf2-a46d-55e65b6ab11c',
+            password: '8fYIbLqjRCQEvozKy3GoEg==',
+            host: 'broker.xively.com',
+            port: 443,
+            status: 'xi/blue/v1/db133d3d-28a8-4fb0-aa6f-492dbbc1f41b/d/a68fb6dc-2ca2-405a-9495-8a57afc0628a/status',
+            actuators: 'xi/blue/v1/db133d3d-28a8-4fb0-aa6f-492dbbc1f41b/d/a68fb6dc-2ca2-405a-9495-8a57afc0628a/actuators'
+          }
+
           var command = {
 
             vibration: function(value) {
@@ -72,7 +81,7 @@
 
             wet: function(value){
               var wet = document.getElementById('wet');
-              if(value=='off'){
+              if(value=='0'){
                 wet.classList.remove("red-bg");
                 wet.classList.add("blue-bg");
                 wet.children[1].innerHTML = 'All Dry';
@@ -85,7 +94,7 @@
 
             fan: function(value){
               var fan = document.getElementById('fan')
-              if(value == 'off'){
+              if(value == '0'){
                 fan.classList.remove("fa-spin")
               } else{
                 fan.classList.add("fa-spin")
@@ -94,24 +103,24 @@
           };
 
           // Create a client instance
-          var client = new Paho.MQTT.Client('test.mosquitto.org', 8080, random_client_id());
+          var client = new Paho.MQTT.Client(credentials['host'], credentials['port'], credentials['user_name']);
 
           // set callback handlers
           client.onConnectionLost = onConnectionLost;
           client.onMessageArrived = onMessageArrived;
 
           // connect the client
-          client.connect({onSuccess:onConnect});
-
-          function random_client_id(){
-            return Math.random().toString(36).substring(7);
-          }
+          client.connect({ userName: credentials['user_name'],
+                           password: credentials['password'],
+                           useSSL: true,
+                           onFailure: function(){ console.log('error'); },
+                           onSuccess:onConnect });
 
           // called when the client connects
           function onConnect() {
             // Once a connection has been made, make a subscription and send a message.
             console.log("onConnect");
-            client.subscribe("xively_demo");
+            client.subscribe(credentials['status']);
           }
 
           // called when the client loses its connection
@@ -130,7 +139,7 @@
 
           function message(command, value){
             msg = new Paho.MQTT.Message('{ "command":"' + command + '", "value":"' + value + '"}');
-            msg.destinationName = 'xively_demo';
+            msg.destinationName = credentials['status'];
             client.send(msg);
           }
         </script>
